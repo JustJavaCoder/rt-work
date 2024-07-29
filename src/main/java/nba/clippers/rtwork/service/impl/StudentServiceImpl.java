@@ -11,17 +11,21 @@ import nba.clippers.rtwork.db.mapper.StudentMapper;
 import nba.clippers.rtwork.service.StudentService;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.List;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
     private static String filePath = "C:\\Users\\Russelltong\\Desktop\\";
+
+    private static String templateFilePath = "src/main/resources/templates/";
 
     @Autowired
     StudentMapper studentMapper;
@@ -86,11 +90,12 @@ public class StudentServiceImpl implements StudentService {
         // 测试studentlist里边有数据没
         System.out.println("打印一下studentlsit");
         studentList.stream().forEach(student -> {
-            System.out.println(student.getId()+student.getName());
+            System.out.println(student.getId() + student.getName());
         });
 
         insertStuList(studentList);
     }
+
 
     private void insertStuList(List<Student> studentList) {
 
@@ -103,5 +108,37 @@ public class StudentServiceImpl implements StudentService {
         });
 
 
+    }
+
+
+    @Override
+    public ResponseEntity<byte[]> downloadTemplate() throws IOException {
+        // 模板文件路径
+        String templateFilePath = "templates/studentTemplate.xlsx";
+
+        // 读取模板文件
+        ClassPathResource classPathResource = new ClassPathResource(templateFilePath);
+        InputStream inputStream = classPathResource.getInputStream();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            byteArrayOutputStream.write(buffer, 0, bytesRead);
+        }
+
+        byte[] fileContent = byteArrayOutputStream.toByteArray();
+        inputStream.close();
+        byteArrayOutputStream.close();
+
+        // 创建响应头
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=studentTemplate.xls");
+
+        // 返回文件内容
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(fileContent);
     }
 }
