@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目管理系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            display: flex;
+            background-color: #333;
+            padding: 10px;
+            justify-content: space-around;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            text-align: center;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .content {
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#project-ledger" onclick="fetchContent('project-ledger')">项目台账</a>
+    <a href="#personnel-distribution" onclick="fetchContent('personnel-distribution')">人员分布</a>
+    <a href="#project-review" onclick="fetchContent('project-review')">项目审核</a>
+</div>
+
+<div id="content" class="content">
+    <h2>欢迎</h2>
+    <p>选择一个菜单项以加载内容。</p>
+</div>
+
+<script>
+    function fetchContent(sectionId) {
+        let url;
+        switch (sectionId) {
+            case 'project-ledger':
+                url = '/api/project-ledger';
+                break;
+            case 'personnel-distribution':
+                url = '/api/personnel-distribution';
+                break;
+            case 'project-review':
+                url = '/api/project-review';
+                break;
+            default:
+                return;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const contentDiv = document.getElementById('content');
+                contentDiv.innerHTML = `
+                        <h2>${sectionId === 'project-ledger' ? '项目台账' : sectionId === 'personnel-distribution' ? '人员分布' : '项目审核'}</h2>
+                        <p>${data.message}</p>
+                    `;
+            })
+            .catch(error => {
+                console.error('Error fetching content:', error);
+            });
+    }
+</script>
+
+</body>
+</html>
