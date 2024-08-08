@@ -102,6 +102,11 @@
             <artifactId>java-jwt</artifactId>
             <version>3.19.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-maven-plugin</artifactId>
+            <version>1.4.0</version>
+        </dependency>
 
 
 
@@ -114,7 +119,27 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.mybatis.generator</groupId>
+                <artifactId>mybatis-generator-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <configuration>
+                    <!-- 插件配置文件的路径 -->
+                    <configurationFile>src/main/resources/generatorConfig.xml</configurationFile>
+                    <overwrite>true</overwrite>
+                </configuration>
+                <dependencies>
+                    <!-- MySQL 驱动依赖，根据需要更改 -->
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>8.0.23</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
         </plugins>
     </build>
+
 
 </project>
