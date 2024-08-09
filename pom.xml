@@ -107,7 +107,11 @@
             <artifactId>mybatis-generator-maven-plugin</artifactId>
             <version>1.4.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+            <version>6.0.0</version>
+        </dependency>
 
 
     </dependencies>

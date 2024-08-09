@@ -1,83 +1,244 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目管理系统</title>
+    <title>一体化经营管理平台</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+        }
+
+        nav ul {
+            list-style-type: none;
             margin: 0;
             padding: 0;
+            overflow: hidden;
         }
-        .navbar {
-            display: flex;
-            background-color: #333;
-            padding: 10px;
-            justify-content: space-around;
+
+        nav ul li {
+            float: left;
         }
-        .navbar a {
+
+        nav ul li a {
+            display: block;
             color: white;
-            text-decoration: none;
-            padding: 14px 20px;
             text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
         }
-        .navbar a:hover {
-            background-color: #ddd;
-            color: black;
+
+        nav ul li a:hover {
+            background-color: #111;
         }
-        .content {
+
+        #content {
             padding: 20px;
         }
-        .hidden {
-            display: none;
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .button-container {
+            margin: 20px 0;
+        }
+
+        .button-container button {
+            margin-right: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
+<header>
+    <nav>
+        <ul>
+            <li><a href="#">工作台</a></li>
+            <li><a href="#" id="projectManagement">项目管理</a></li>
+            <li><a href="#" id="projectApplication">项目申请</a></li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+    <div class="button-container">
+        <button id="exportButton">文件导出</button>
+        <button id="importButton">文件导入</button>
+        <button id="downloadTemplateButton">模板下载</button>
+        <button id="testButton">测试</button>
+        <button id="initiationButton">立项</button>
+    </div>
 
-<div class="navbar">
-    <a href="#project-ledger" onclick="fetchContent('project-ledger')">项目台账</a>
-    <a href="#personnel-distribution" onclick="fetchContent('personnel-distribution')">人员分布</a>
-    <a href="#project-review" onclick="fetchContent('project-review')">项目审核</a>
-</div>
-
-<div id="content" class="content">
-    <h2>欢迎</h2>
-    <p>选择一个菜单项以加载内容。</p>
-</div>
-
+    <!-- 表格容器 -->
+    <div id="projectTableContainer"></div>
+</main>
 <script>
-    function fetchContent(sectionId) {
-        let url;
-        switch (sectionId) {
-            case 'project-ledger':
-                url = '/api/project-ledger';
-                break;
-            case 'personnel-distribution':
-                url = '/api/personnel-distribution';
-                break;
-            case 'project-review':
-                url = '/api/project-review';
-                break;
-            default:
-                return;
-        }
-
-        fetch(url)
-            .then(response => response.json())
+    // 项目申请按钮事件监听
+    document.getElementById('projectApplication').addEventListener('click', function(event) {
+        event.preventDefault();
+        fetch('http://localhost:8080/projectIndex/inproj/findApplPage')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // 解析为 JSON
+            })
             .then(data => {
-                const contentDiv = document.getElementById('content');
-                contentDiv.innerHTML = `
-                        <h2>${sectionId === 'project-ledger' ? '项目台账' : sectionId === 'personnel-distribution' ? '人员分布' : '项目审核'}</h2>
-                        <p>${data.message}</p>
-                    `;
+                const tableContainer = document.getElementById('projectTableContainer');
+                tableContainer.innerHTML = ''; // 清空之前的内容
+
+                // 创建表格
+                const table = document.createElement('table');
+
+                // 创建表头
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const headers = [
+                    '自增主键', '项目名称', '项目金额', '项目来源', '项目类型',
+                    '项目级别', '立项日期', '计划验收日期', '计划结项日期',
+                    '项目负责人', '所属部门', '市场负责人', '费用/资本化类型',
+                    '关联商机', '中标编号', '项目概述', '项目附件',
+                    '创建日期', '更新日期'
+                ];
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // 创建表体
+                const tbody = document.createElement('tbody');
+                data.data.list.forEach(project => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td>${project.id}</td>
+                    <td>${project.projectName}</td>
+                    <td>${project.projectAmount}</td>
+                    <td>${project.projectSource}</td>
+                    <td>${project.projectType}</td>
+                    <td>${project.projectLevel}</td>
+                    <td>${new Date(project.projectInitiationDate).toLocaleDateString()}</td>
+                    <td>${new Date(project.plannedAcceptanceDate).toLocaleDateString()}</td>
+                    <td>${new Date(project.plannedCompletionDate).toLocaleDateString()}</td>
+                    <td>${project.projectLeader}</td>
+                    <td>${project.department}</td>
+                    <td>${project.marketLeader}</td>
+                    <td>${project.expenseOrCapital}</td>
+                    <td>${project.connectBussOpportunity}</td>
+                    <td>${project.winBidId}</td>
+                    <td>${project.projectSummary}</td>
+                    <td>${project.projectAttachment}</td>
+                    <td>${new Date(project.createdAt).toLocaleDateString()}</td>
+                    <td>${new Date(project.updatedAt).toLocaleDateString()}</td>
+                `;
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+
+                // 将表格添加到页面
+                tableContainer.appendChild(table);
             })
             .catch(error => {
-                console.error('Error fetching content:', error);
+                console.error('Error fetching application page:', error);
+                const content = document.getElementById('content');
+                content.innerHTML = 'Error loading application page';
             });
-    }
-</script>
+    });
 
+    // 立项按钮事件监听
+    document.getElementById('initiationButton').addEventListener('click', function(event) {
+        event.preventDefault();
+        fetch('http://localhost:8080/projectIndex/inproj/findAll')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const tableContainer = document.getElementById('projectTableContainer');
+                tableContainer.innerHTML = ''; // 清空之前的内容
+
+                // 创建输入表单
+                const form = document.createElement('form');
+                data.data.forEach(project => {
+                    for (const key in project) {
+                        if (project.hasOwnProperty(key)) {
+                            const label = document.createElement('label');
+                            label.textContent = key;
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.name = key;
+                            form.appendChild(label);
+                            form.appendChild(input);
+                            form.appendChild(document.createElement('br'));
+                        }
+                    }
+                });
+
+                // 创建保存按钮
+                const saveButton = document.createElement('button');
+                saveButton.textContent = '保存';
+                saveButton.type = 'button';
+                saveButton.addEventListener('click', function() {
+                    const formData = new FormData(form);
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        data[key] = value;
+                    });
+
+                    fetch('http://localhost:8080/projectIndex/inproj/save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(result => {
+                            alert('立项成功');
+                        })
+                        .catch(error => {
+                            console.error('Error saving project:', error);
+                        });
+                });
+
+                form.appendChild(saveButton);
+                tableContainer.appendChild(form);
+            })
+            .catch(error => {
+                console.error('Error fetching project data:', error);
+            });
+    });
+</script>
 </body>
 </html>

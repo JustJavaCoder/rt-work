@@ -117,4 +117,6 @@ public interface ProjectInfoMapper {
      * @mbg.generated Thu Aug 08 14:38:39 CST 2024
      */
     int updateByPrimaryKey(ProjectInfo record);
+
+    List<ProjectInfo> selectAll();
 }
