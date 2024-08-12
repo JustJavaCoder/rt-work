@@ -9,9 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,10 +57,26 @@ public class ProjectController {
 
         System.out.println("进入了findApplPage方法");
 
-      List<ProjectInfo>  projectInfos= projectService.findApplPage();
+        List<ProjectInfo> projectInfos = projectService.findApplPage();
 
         return ResponseUtil.okList(projectInfos);
     }
+
+
+    /*
+     * http://localhost:8080/projectIndex/inproj/save
+     * post 前端接收项目的各个属性并且保存到数据库*/
+    @PostMapping("inproj/save")
+    public Object saveProject(@RequestBody ProjectInfo projectInfo) {
+
+        int i = projectService.saveProject(projectInfo);
+
+        return ResponseUtil.ok();
+    }
+
+    /*
+    * http://localhost:8080/projectIndex/upload
+    * 利用minio实现文件上传*/
 
 
 }

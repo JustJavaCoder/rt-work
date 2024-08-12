@@ -2,6 +2,7 @@ package nba.clippers.rtwork.db.mapper;
 
 import java.util.List;
 import nba.clippers.rtwork.db.entity.ProjectInfo;
+import nba.clippers.rtwork.db.vo.ProjectInfoVO;
 import nba.clippers.rtwork.modelExample.ProjectInfoExample;
 import org.apache.ibatis.annotations.Param;
 

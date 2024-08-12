@@ -7,4 +7,7 @@ import java.util.List;
 public interface ProjectService {
 
     List<ProjectInfo> findApplPage();
+
+    int saveProject(ProjectInfo projectInfo);
+
 }

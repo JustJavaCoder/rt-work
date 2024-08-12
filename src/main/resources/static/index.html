@@ -5,71 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>一体化经营管理平台</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px 0;
-        }
-
-        nav ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        nav ul li {
-            float: left;
-        }
-
-        nav ul li a {
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-
-        nav ul li a:hover {
-            background-color: #111;
-        }
-
-        #content {
-            padding: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        table, th, td {
-            border: 1px solid black;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .button-container {
-            margin: 20px 0;
-        }
-
-        .button-container button {
-            margin-right: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
+        /* Existing styles */
     </style>
 </head>
 <body>
@@ -88,14 +24,16 @@
         <button id="importButton">文件导入</button>
         <button id="downloadTemplateButton">模板下载</button>
         <button id="testButton">测试</button>
-        <button id="initiationButton">立项</button>
+        <button id="createProjectButton">立项</button> <!-- 新增的立项按钮 -->
     </div>
 
     <!-- 表格容器 -->
     <div id="projectTableContainer"></div>
+
+    <!-- 立项表单容器 -->
+    <div id="projectFormContainer" class="form-container"></div>
 </main>
 <script>
-    // 项目申请按钮事件监听
     document.getElementById('projectApplication').addEventListener('click', function(event) {
         event.preventDefault();
         fetch('http://localhost:8080/projectIndex/inproj/findApplPage')
@@ -135,26 +73,26 @@
                 data.data.list.forEach(project => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                    <td>${project.id}</td>
-                    <td>${project.projectName}</td>
-                    <td>${project.projectAmount}</td>
-                    <td>${project.projectSource}</td>
-                    <td>${project.projectType}</td>
-                    <td>${project.projectLevel}</td>
-                    <td>${new Date(project.projectInitiationDate).toLocaleDateString()}</td>
-                    <td>${new Date(project.plannedAcceptanceDate).toLocaleDateString()}</td>
-                    <td>${new Date(project.plannedCompletionDate).toLocaleDateString()}</td>
-                    <td>${project.projectLeader}</td>
-                    <td>${project.department}</td>
-                    <td>${project.marketLeader}</td>
-                    <td>${project.expenseOrCapital}</td>
-                    <td>${project.connectBussOpportunity}</td>
-                    <td>${project.winBidId}</td>
-                    <td>${project.projectSummary}</td>
-                    <td>${project.projectAttachment}</td>
-                    <td>${new Date(project.createdAt).toLocaleDateString()}</td>
-                    <td>${new Date(project.updatedAt).toLocaleDateString()}</td>
-                `;
+                        <td>${project.id}</td>
+                        <td>${project.projectName}</td>
+                        <td>${project.projectAmount}</td>
+                        <td>${project.projectSource}</td>
+                        <td>${project.projectType}</td>
+                        <td>${project.projectLevel}</td>
+                        <td>${new Date(project.projectInitiationDate).toLocaleDateString()}</td>
+                        <td>${new Date(project.plannedAcceptanceDate).toLocaleDateString()}</td>
+                        <td>${new Date(project.plannedCompletionDate).toLocaleDateString()}</td>
+                        <td>${project.projectLeader}</td>
+                        <td>${project.department}</td>
+                        <td>${project.marketLeader}</td>
+                        <td>${project.expenseOrCapital}</td>
+                        <td>${project.connectBussOpportunity}</td>
+                        <td>${project.winBidId}</td>
+                        <td>${project.projectSummary}</td>
+                        <td>${project.projectAttachment}</td>
+                        <td>${new Date(project.createdAt).toLocaleDateString()}</td>
+                        <td>${new Date(project.updatedAt).toLocaleDateString()}</td>
+                    `;
                     tbody.appendChild(row);
                 });
                 table.appendChild(tbody);
@@ -169,75 +107,182 @@
             });
     });
 
-    // 立项按钮事件监听
-    document.getElementById('initiationButton').addEventListener('click', function(event) {
+    // 立项按钮点击事件
+    document.getElementById('createProjectButton').addEventListener('click', function(event) {
         event.preventDefault();
-        fetch('http://localhost:8080/projectIndex/inproj/findAll')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+
+        const formContainer = document.getElementById('projectFormContainer');
+        formContainer.innerHTML = ''; // 清空之前的内容
+
+        // 创建立项表单
+        const form = document.createElement('form');
+        const fields = [
+            { label: '项目名称', name: 'projectName' },
+            { label: '项目金额', name: 'projectAmount', type: 'number' },
+            { label: '项目来源', name: 'projectSource' },
+            { label: '项目类型', name: 'projectType' },
+            { label: '项目级别', name: 'projectLevel' },
+            { label: '立项日期', name: 'projectInitiationDate', type: 'date' },
+            { label: '计划验收日期', name: 'plannedAcceptanceDate', type: 'date' },
+            { label: '计划结项日期', name: 'plannedCompletionDate', type: 'date' },
+            { label: '项目负责人', name: 'projectLeader' },
+            { label: '所属部门', name: 'department' },
+            { label: '市场负责人', name: 'marketLeader' },
+            { label: '费用/资本化类型', name: 'expenseOrCapital' },
+            { label: '关联商机', name: 'connectBussOpportunity' },
+            { label: '中标编号', name: 'winBidId' },
+            { label: '项目概述', name: 'projectSummary' },
+            { label: '项目附件', name: 'projectAttachment', type: 'file' } // 文件输入类型
+        ];
+
+        fields.forEach(field => {
+            const label = document.createElement('label');
+            label.textContent = field.label;
+            const input = document.createElement('input');
+            input.type = field.type || 'text';
+            input.name = field.name;
+            form.appendChild(label);
+            form.appendChild(input);
+        });
+
+        // 创建保存按钮
+        const saveButton = document.createElement('button');
+        saveButton.type = 'button';
+        saveButton.textContent = '保存';
+        form.appendChild(saveButton);
+
+        formContainer.appendChild(form);
+
+        // 保存按钮点击事件
+        saveButton.addEventListener('click', function() {
+            const formData = new FormData();
+            fields.forEach(field => {
+                const input = form.querySelector(`[name="${field.name}"]`);
+                if (input.type === 'file') {
+                    formData.append(field.name, input.files[0]); // 处理文件上传
+                } else {
+                    formData.append(field.name, input.value);
                 }
-                return response.json();
-            })
-            .then(data => {
-                const tableContainer = document.getElementById('projectTableContainer');
-                tableContainer.innerHTML = ''; // 清空之前的内容
-
-                // 创建输入表单
-                const form = document.createElement('form');
-                data.data.forEach(project => {
-                    for (const key in project) {
-                        if (project.hasOwnProperty(key)) {
-                            const label = document.createElement('label');
-                            label.textContent = key;
-                            const input = document.createElement('input');
-                            input.type = 'text';
-                            input.name = key;
-                            form.appendChild(label);
-                            form.appendChild(input);
-                            form.appendChild(document.createElement('br'));
-                        }
-                    }
-                });
-
-                // 创建保存按钮
-                const saveButton = document.createElement('button');
-                saveButton.textContent = '保存';
-                saveButton.type = 'button';
-                saveButton.addEventListener('click', function() {
-                    const formData = new FormData(form);
-                    const data = {};
-                    formData.forEach((value, key) => {
-                        data[key] = value;
-                    });
-
-                    fetch('http://localhost:8080/projectIndex/inproj/save', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(result => {
-                            alert('立项成功');
-                        })
-                        .catch(error => {
-                            console.error('Error saving project:', error);
-                        });
-                });
-
-                form.appendChild(saveButton);
-                tableContainer.appendChild(form);
-            })
-            .catch(error => {
-                console.error('Error fetching project data:', error);
             });
+
+            fetch('http://localhost:8080/minio/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('File uploaded successfully:', data);
+                })
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                });
+
+            fetch('http://localhost:8080/projectIndex/inproj/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    projectName: form.querySelector('[name="projectName"]').value,
+                    projectAmount: form.querySelector('[name="projectAmount"]').value,
+                    projectSource: form.querySelector('[name="projectSource"]').value,
+                    projectType: form.querySelector('[name="projectType"]').value,
+                    projectLevel: form.querySelector('[name="projectLevel"]').value,
+                    projectInitiationDate: form.querySelector('[name="projectInitiationDate"]').value,
+                    plannedAcceptanceDate: form.querySelector('[name="plannedAcceptanceDate"]').value,
+                    plannedCompletionDate: form.querySelector('[name="plannedCompletionDate"]').value,
+                    projectLeader: form.querySelector('[name="projectLeader"]').value,
+                    department: form.querySelector('[name="department"]').value,
+                    marketLeader: form.querySelector('[name="marketLeader"]').value,
+                    expenseOrCapital: form.querySelector('[name="expenseOrCapital"]').value,
+                    connectBussOpportunity: form.querySelector('[name="connectBussOpportunity"]').value,
+                    winBidId: form.querySelector('[name="winBidId"]').value,
+                    projectSummary: form.querySelector('[name="projectSummary"]').value,
+                    projectAttachment: form.querySelector('[name="projectAttachment"]').value
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('立项成功');
+    // 跳转到项目申请界面
+                    document.getElementById('projectApplication').click();
+                })
+                .catch(error => {
+                    console.error('Error saving project:', error);
+                    alert('立项失败，请重试');
+                });
+        });
+    });
+
+    // 添加文件上传事件
+    document.getElementById('importButton').addEventListener('click', function() {
+        const inputFile = document.createElement('input');
+        inputFile.type = 'file';
+        inputFile.style.display = 'none';
+        document.body.appendChild(inputFile);
+
+        inputFile.addEventListener('change', function() {
+            const file = inputFile.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('http://localhost:8080/minio/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('File uploaded successfully:', data);
+                    alert('文件上传成功');
+                })
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                    alert('文件上传失败');
+                });
+        });
+
+        inputFile.click();
+    });
+
+    // Existing functionalities
+    document.getElementById('exportButton').addEventListener('click', function() {
+        window.location.href = 'http://localhost:8080/nba/clippers/rtwork/student/stuExport';
+    });
+
+    document.getElementById('downloadTemplateButton').addEventListener('click', function() {
+        window.location.href = 'http://localhost:8080/nba/clippers/rtwork/student/downloadTemplate';
+    });
+
+    document.getElementById('testButton').addEventListener('click', function() {
+        fetch('http://localhost:8080/projectIndex/test')
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+            });
+    });
+
+    document.getElementById('projectManagement').addEventListener('click', function() {
+        const img = document.createElement('img');
+        img.src = 'static/picture/indexPicture.png';
+        img.alt = 'Index Picture';
+        const content = document.getElementById('content');
+        content.innerHTML = ''; // 清空之前的内容
+        content.appendChild(img);
     });
 </script>
 </body>
